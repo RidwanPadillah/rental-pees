@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use Carbon\Carbon;
 use App\Models\Device;
 use Livewire\Component;
 use App\Models\Transaction;
@@ -15,6 +16,7 @@ class Create extends Component
     public function mount()
     {
         $this->transactions = Transaction::select('id', 'code', 'start_date', 'end_date', 'device_id', 'status', 'session', 'user_id')->whereIn('status', ['pending', 'success'])
+            ->whereDate('end_date', '>=', Carbon::today())
             ->with('device')
             ->get()
             ->map(function ($transaction) {

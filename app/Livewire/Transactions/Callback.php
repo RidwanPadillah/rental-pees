@@ -22,54 +22,54 @@ class Callback extends Component
     {
         $transaction = Transaction::where('code', $request->get('order_id'))->first();
 
-        switch ($transaction->status) {
+        
+        if (empty($transaction)) return;
+
+        $this->status = $request->get('status');
+        $status = (array)\Midtrans\Transaction::status($request->get('order_id'));
+        
+        $arrayStatus = [
+            200 => 'success',
+            201 => 'pending',
+            202 => 'failed',
+            407 => 'expired'
+        ];
+        
+        switch ($arrayStatus[$status['status_code']]) {
             case 'pending':
                 $this->headingText = 'Transaksi Belum Dibayar';
                 $this->headingColor = 'red';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' belum dibayar, silahkan lakukan pembayaran terlebih dahulu';
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> belum dibayar, silahkan lakukan pembayaran terlebih dahulu';
                 break;
 
             case 'success':
                 $this->headingText = 'Transaksi Berhasil';
                 $this->headingColor = 'green';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' berhasil, silahkan datang tepat waktu pada <br>' . $transaction->start_date;
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> berhasil, silahkan datang tepat waktu pada <br>' . $transaction->start_date;
                 break;
             case 'failed':
                 $this->headingText = 'Transaksi Gagal';
                 $this->headingColor = 'red';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' gagal, silahkan coba lagi';
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> gagal, silahkan coba kembali';
                 break;
             case 'cancel':
                 $this->headingText = 'Transaksi Dibatalkan';
                 $this->headingColor = 'red';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' telah dibatalkan, silahkan transaksi lagi';
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> telah dibatalkan, silahkan transaksi kembali';
                 break;
             case 'expired':
                 $this->headingText = 'Transaksi Kadaluarsa';
                 $this->headingColor = 'red';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' telah kadaluarsa, silahkan transaksi lagi';
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> telah kadaluarsa, silahkan transaksi kembali';
                 break;
             default:
                 $this->headingText = 'Transaksi Tidak Ditemukan';
                 $this->headingColor = 'red';
-                $this->subheadingText = 'Transaksi dengan kode ' . $request->get('order_id') . ' tidak ditemukan';
+                $this->subheadingText = 'Transaksi dengan kode <strong>' . $request->get('order_id') . '</strong> tidak ditemukan';
                 break;
         }
-        if (empty($transaction)) return;
-        if ($transaction->status !== 'pending') {
-            $this->status = $transaction->status;
-            return;
-        }
-
-        $this->status = $request->get('status');
-        $status = (array)\Midtrans\Transaction::status($request->get('order_id'));
-        $arrayStatus = [
-            200 => 'success',
-            201 => 'pending',
-            202 => 'failed',
-        ];
         $dataUpdate = ['status' => $arrayStatus[$status['status_code']] ?? 'pending'];
-        if ($status['status_code'] == 200) {
+        if ($arrayStatus[$status['status_code']] != 'pending') {
             $dataUpdate['payment_method'] = $status['payment_type'];
             $dataUpdate['payment_details'] = json_encode($status);
         }
