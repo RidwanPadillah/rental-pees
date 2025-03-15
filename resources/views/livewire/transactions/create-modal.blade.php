@@ -24,14 +24,10 @@
                     <flux:separator variant="subtle" class="mb-2 mt-2" />
                 @endforeach
             </div>
-            <div class="flex gap-2">
+            <div class="flex">
                 <flux:spacer />
 
-                <flux:modal.close>
-                    <flux:button variant="ghost">Batal</flux:button>
-                </flux:modal.close>
-
-                <flux:button type="submit" variant="primary" wire:click="order" :disabled="!$selectedDevice">Pesan Sekarang</flux:button>
+                <flux:button type="submit" variant="primary" class="w-full" wire:click="order" :disabled="!$selectedDevice">Pesan Sekarang</flux:button>
             </div>
         </div>
     </flux:modal>

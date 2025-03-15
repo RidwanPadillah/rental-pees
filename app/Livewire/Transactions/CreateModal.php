@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 class CreateModal extends Component
 {
@@ -54,6 +55,8 @@ class CreateModal extends Component
                       $q->where('start_date', '<=', $startDate)
                         ->where('end_date', '>=', $endDate);
                   });
+            })->whereHas('device', function(Builder $query){
+                $query->where('status', 'active');
             })->with('device')->get();
 
             // Jika tidak ada booking, device masih full kosong
